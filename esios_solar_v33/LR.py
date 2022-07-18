@@ -81,12 +81,13 @@ def LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
 
     # Loads stacked data to train the model. This is the best data format to train this model, a DataFrame object 
     # which every row contains all the training or test data for the model.
-    lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shift)
+    if shift == 0: shifted = 1
+    lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shifted)
     
     for iteration in range(0, cv):
         print('LR ITERATION', iteration)
         # Prepares the data to train and validates the model in every folder.
-        x_train, y_train, x_test, y_test, norm_params = prepareStackedData(lista_train, lista_train_y, lista_test, lista_test_y)
+        x_train, y_train, x_test, y_test, norm_params = prepareStackedData(lista_train, lista_train_y, lista_test, lista_test_y, iteration)
 
         # Selects only the best parameters to train and validates the model.
         sel_ = select_var(x_train, y_train, iteration)

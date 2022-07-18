@@ -67,7 +67,7 @@ def storeForecastValues(prediction, norm_params, y_test, all_data,
 
     saveValues(realesfl, esiosfl, predictedfl, type, "")
     
-def XGBoost(tipo, cv, shift, all_data, folder_split, train_split, df2):
+def XGBoost(tipo, cv, shift, all_data, folder_split, train_split, df2, forecast_horizon, past_history):
     """
     Runs XGBoost train and test for Multivariate or Univariate models.
     :param tipo: String, M -> Multivariate, U -> Univariate.
@@ -77,16 +77,20 @@ def XGBoost(tipo, cv, shift, all_data, folder_split, train_split, df2):
     :param folder_split: int, it specifies how many entries are in each folder.
     :param train_split: int, it specifies how many entries are in each train set for every folder.
     :param df2: DataFrame object, with the preprocessed data.
+    :param forecast_horizon: int, the number of steps in the future that the model will forecast.
+    :param past_history: int, the number of steps in the past that the model use as the size of the sliding window to create the train data
     """
     # First, inializes the model and the variables where accuracy metrics will be stored.
     maeWape, maeWape_esios = [[], []], [[], []]
 
     # Loads stacked data to train the model. This is the best data format to train this model, a DataFrame object 
     # which every row contains all the training or test data for the model.
+    if shift == 0: shifted = 1
     if(tipo == "M"):
-        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shift)
+        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shifted)
     else:
-        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('U', shift)
+        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('U', shifted)
+
     reg = inicializa_XGBoost()
     
     # For every folder we will train the model and obtain the MAE and WAPE accuracy metrics using the validate data.
@@ -94,7 +98,7 @@ def XGBoost(tipo, cv, shift, all_data, folder_split, train_split, df2):
         print('XGBoost ITERATION', iteration)
 
         # Prepares the data to train and validates the model in every folder.
-        x_train, y_train, x_test, y_test, norm_params = prepareStackedData(lista_train, lista_train_y, lista_test, lista_test_y)
+        x_train, y_train, x_test, y_test, norm_params = prepareStackedData(lista_train, lista_train_y, lista_test, lista_test_y, iteration)
 
         # We train the model with the training data and use the test data to validate the model.
         reg = reg.fit(x_train, y_train)
@@ -108,7 +112,7 @@ def XGBoost(tipo, cv, shift, all_data, folder_split, train_split, df2):
         for count, prediction in enumerate(preds):
             storeForecastValues(prediction, norm_params, y_test, all_data,
                     count, forecastedData, realData, 
-                    train_split, folder_split, esiosForecast, iteration, tipo)
+                    train_split, folder_split, esiosForecast, iteration, tipo, past_history, forecast_horizon)
 
         realData, forecastedData, esiosForecast = outlierDetector(realData, forecastedData, esiosForecast)
         

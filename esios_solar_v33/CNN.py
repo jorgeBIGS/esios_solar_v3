@@ -328,7 +328,7 @@ def CNN_LSTM(all_data, df2, folder_split, cv, epochs,
   """
     x_train, y_train, x_test, y_test, norm_params = prepareTrain(
             folder_split, df2, 0, train_split)
-    model = inicializaModelo_CNN_LSTM(x_train)
+    model = inicializaModelo_CNN_LSTM(x_train, forecast_horizon)
     maeWape, maeWape_esios= [[], []], [[], []]
 
     realData, forecastedData, esiosForecast = [], [], []
