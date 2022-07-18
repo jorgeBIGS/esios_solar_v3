@@ -343,9 +343,7 @@ def CNN_LSTM(all_data, df2, folder_split, cv, epochs,
                 forecastedData, realData, 
                 train_split, folder_split, esiosForecast, 0,
                 maeWape, maeWape_esios, df2, type, past_history, forecast_horizon)
-
-    saveResultsAverage(maeWape, maeWape_esios, 'CNN_LSTM', type)
-
+    
     for iteration in range(1, cv):
         realData, forecastedData, esiosForecast = [], [], []
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
