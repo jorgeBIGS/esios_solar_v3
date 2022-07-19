@@ -20,7 +20,7 @@ getSeed()
 
 # Load data for Univariant models, we only load the period when we have all the data aviable.
 epochs = 100
-batch_size = 64
+batch_size = 128
 forecast_horizon = 1
 past_history = 48
 shift = 24

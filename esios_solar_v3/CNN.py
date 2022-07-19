@@ -47,30 +47,10 @@ def inicializaModelo_24h(x_train2, forecast_horizon):
   """
     inp = Input(shape=(x_train2.shape[-2:]))
     
-    x = Conv1D(64, 7, activation='relu', padding='same')(inp)
-    x = Conv1D(128, 9, activation='relu', padding='same')(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(128, 9, activation='relu', padding='same')(x)
-    x = Conv1D(128, 11, activation='relu', padding='same')(x)
-    x = MaxPool1D(pool_size=2)(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(128, 13, activation='relu', padding='same')(x)
-    x = Conv1D(64, 7, activation='relu', padding='same')(x)
-    x = Conv1D(64, 9, activation='relu', padding='same')(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(128, 9, activation='relu', padding='same')(x)
-    x = MaxPool1D(pool_size=2)(x)
-    x = Conv1D(64, 5, activation='relu', padding='same')(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(64, 5, activation='relu', padding='same')(x)
-    x = Conv1D(32, 5, activation='relu', padding='same')(x)
-    x = Dropout(0.1)(x)
-    x = Conv1D(64, 5, activation='relu', padding='same')(x)
-    x = Conv1D(64, 7, activation='relu', padding='same')(x)
-    x = Conv1D(32, 5, activation='relu', padding='same')(x)
-
+    x = Conv1D(64, 3, activation='relu', padding='same')(inp)
+    x = Conv1D(256, 7, activation='relu', padding='same')(x)
+    x = Conv1D(128, 5, activation='relu', padding='same')(x)
     x = Flatten()(x)
-    x = Dense(50)(x)
     x = Dense(forecast_horizon)(x)
     model = keras.Model(inputs=inp, outputs=x)
     
@@ -124,36 +104,12 @@ def inicializaModelo_CNN_24h(x_train2, forecast_horizon):
   """
     inp = Input(shape=(x_train2.shape[-2:]))
     
-    x = Conv1D(128, 5, activation='relu', padding='same')(inp)
-    x = Conv1D(128, 9, activation='relu', padding='same')(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(128, 9, activation='relu', padding='same')(x)
-    x = Conv1D(128, 11, activation='relu', padding='same')(x)
-    x = MaxPool1D(pool_size=2)(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(64, 7, activation='relu', padding='same')(x)
-    x = Conv1D(64, 9, activation='relu', padding='same')(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(128, 9, activation='relu', padding='same')(x)
-    x = MaxPool1D(pool_size=2)(x)
-    x = Conv1D(64, 3, activation='relu', padding='same')(x)
-    x = Dropout(0.15)(x)
-    x = Conv1D(64, 5, activation='relu', padding='same')(x)
-    x = Conv1D(32, 7, activation='relu', padding='same')(x)
-    x = Dropout(0.1)(x)
-    x = Conv1D(32, 5, activation='relu', padding='same')(x)
-    x = Conv1D(32, 7, activation='relu', padding='same')(x)
-    x = Conv1D(32, 3, activation='relu', padding='same')(x)
-
+    x = Conv1D(64, 7, activation='relu', padding='same')(inp)
+    x = Conv1D(256, 9, activation='relu', padding='same')(x)
     x = LSTM(64, return_sequences=True)(x)
     x = LSTM(128, return_sequences=True)(x)
-    x = LSTM(256, return_sequences=True)(x)
-    x = Dropout(0.1)(x)
-    x = LSTM(64, return_sequences=True)(x)
-    x = LSTM(32, return_sequences=True)(x)
 
     x = Flatten()(x)
-    x = Dense(50)(x)
     x = Dense(forecast_horizon)(x)
     model = keras.Model(inputs=inp, outputs=x)
     
@@ -343,7 +299,7 @@ def CNN_LSTM(all_data, df2, folder_split, cv, epochs,
                 forecastedData, realData, 
                 train_split, folder_split, esiosForecast, 0,
                 maeWape, maeWape_esios, df2, type, past_history, forecast_horizon)
-    
+
     for iteration in range(1, cv):
         realData, forecastedData, esiosForecast = [], [], []
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
