@@ -1,3 +1,6 @@
+[![TensorFlow 2.9.1](https://img.shields.io/badge/TensorFlow-2.9.1-orange?logo=tensorflow)](https://github.com/tensorflow/tensorflow/releases/tag/v2.9.1)
+[![Python 3.8](https://img.shields.io/badge/Python-3.8-blue)](https://www.python.org/downloads/release/python-380/)
+
 Para realizar las pruebas de las redes CNN y CNN_LSTM del artículo solo debe ejecutarse el archivo run.py, 
 en el se pueden encontrar desde la línea 22 a la 27 algunos parámetros que pueden ser modificados:
   
