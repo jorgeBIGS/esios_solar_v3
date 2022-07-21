@@ -39,7 +39,7 @@ def inicializaModelo_CNN(x_train2, forecast_horizon):
     model.compile(optimizer='adam', loss='mae')
     return model
 
-def inicializaModelo_24h(x_train2, forecast_horizon):
+def inicializaModelo_CNN_24h(x_train2, forecast_horizon):
     """
   Initializes the CNN proposed model.
   :param x_train2: List, contains the training data to check its shape.
@@ -47,9 +47,7 @@ def inicializaModelo_24h(x_train2, forecast_horizon):
   """
     inp = Input(shape=(x_train2.shape[-2:]))
     
-    x = Conv1D(64, 3, activation='relu', padding='same')(inp)
-    x = Conv1D(256, 7, activation='relu', padding='same')(x)
-    x = Conv1D(128, 5, activation='relu', padding='same')(x)
+    x = Conv1D(64, 5, activation='relu', padding='same')(inp)
     x = Flatten()(x)
     x = Dense(forecast_horizon)(x)
     model = keras.Model(inputs=inp, outputs=x)
@@ -96,7 +94,7 @@ def inicializaModelo_CNN_LSTM(x_train2, forecast_horizon):
     
     return model
 
-def inicializaModelo_CNN_24h(x_train2, forecast_horizon):
+def inicializaModelo_CNN_LSTM_24h(x_train2, forecast_horizon):
     """
   Initializes the CNN proposed model.
   :param x_train2: List, contains the training data to check its shape.
@@ -105,9 +103,7 @@ def inicializaModelo_CNN_24h(x_train2, forecast_horizon):
     inp = Input(shape=(x_train2.shape[-2:]))
     
     x = Conv1D(64, 7, activation='relu', padding='same')(inp)
-    x = Conv1D(256, 9, activation='relu', padding='same')(x)
     x = LSTM(64, return_sequences=True)(x)
-    x = LSTM(128, return_sequences=True)(x)
 
     x = Flatten()(x)
     x = Dense(forecast_horizon)(x)
@@ -187,6 +183,7 @@ def comparePreds(norm_params, preds, y_test, all_data, model,
     M->Multivariate.
     :param past_history: int, the number of steps in the past that the model use as the size of the sliding window to create the train data.
     :param forecast_horizon: int, the number of steps in the future that the model will forecast.
+    
     """
 
     # Validates the model using real data, forecasted test data and esios forecast data.
@@ -205,12 +202,13 @@ def comparePreds(norm_params, preds, y_test, all_data, model,
     # We store the MAE and WAPE for every folder and draw a gragh with this data.
     saveResults(maeWape, maeWape_esios, model, type)        
     dibujaGraph(train_split, folder_split, df2, iteration,
-                realData, forecastedData, esiosForecast, model, type)
+                realData, forecastedData, esiosForecast, model, type, past_history)
 
 
 
 def CNN(all_data, df2, folder_split, cv, epochs, 
-                   batch_size, train_split, type, forecast_horizon, past_history):
+                   batch_size, train_split, type, forecast_horizon, past_history,
+                   shift):
     """
   Allows to run the CNN_univariant experiment. 
   :param all_data: Dataframe object, contains all the data.
@@ -224,12 +222,14 @@ def CNN(all_data, df2, folder_split, cv, epochs,
   :param type: String, represents type of model, U-> Univariate, M-> Multivariate .
   :param forecast_horizon: int, the number of steps in the future that the model will forecast.
   :param past_history: int, the number of steps in the past that the model use as the size of the sliding window to create the train data.
+  :param shift: int, Specifies how many entries are between the last entry of 
+  the past_history and the first of the forecast_horizon. 
   """
     maeWape, maeWape_esios = [[], []], [[], []]
     realData, forecastedData, esiosForecast = [], [], []
     x_train, y_train, x_test, y_test, norm_params = prepareTrain(
-            folder_split, df2, 0, train_split)
-    model = inicializaModelo_CNN(x_train, forecast_horizon)
+            folder_split, df2, 0, train_split, shift, past_history, forecast_horizon)
+    model = inicializaModelo_CNN_24h(x_train, forecast_horizon)
 
     model.fit(x_train, y_train,
              batch_size=batch_size,
@@ -247,7 +247,7 @@ def CNN(all_data, df2, folder_split, cv, epochs,
     for iteration in range(1, cv):
         realData, forecastedData, esiosForecast = [], [], []
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
-            folder_split, df2, iteration, train_split)
+            folder_split, df2, iteration, train_split, shift, past_history, forecast_horizon)
             
         model.fit(x_train, y_train,
              batch_size=batch_size,
@@ -264,7 +264,8 @@ def CNN(all_data, df2, folder_split, cv, epochs,
     saveResultsAverage(maeWape, maeWape_esios, 'CNN', type)
 
 def CNN_LSTM(all_data, df2, folder_split, cv, epochs, 
-                   batch_size, train_split, type, forecast_horizon, past_history):
+                   batch_size, train_split, type, forecast_horizon, past_history,
+                   shift):
     """
   Allows to run the CNN_LSTM_univariant experiment. 
   :param all_data: Dataframe object, contains all the data.
@@ -278,11 +279,13 @@ def CNN_LSTM(all_data, df2, folder_split, cv, epochs,
   :param type: String, represents type of model, U-> Univariate, M-> Multivariate 
   :param forecast_horizon: int, the number of steps in the future that the model will forecast.
   :param past_history: int, the number of steps in the past that the model use as the size of the sliding window to create the train data.
+  :param shift: int, Specifies how many entries are between the last entry of 
+  the past_history and the first of the forecast_horizon. 
   
   """
     x_train, y_train, x_test, y_test, norm_params = prepareTrain(
-            folder_split, df2, 0, train_split)
-    model = inicializaModelo_CNN_LSTM(x_train, forecast_horizon)
+            folder_split, df2, 0, train_split, shift, past_history, forecast_horizon)
+    model = inicializaModelo_CNN_LSTM_24h(x_train, forecast_horizon)
     maeWape, maeWape_esios= [[], []], [[], []]
 
     realData, forecastedData, esiosForecast = [], [], []
@@ -303,7 +306,7 @@ def CNN_LSTM(all_data, df2, folder_split, cv, epochs,
     for iteration in range(1, cv):
         realData, forecastedData, esiosForecast = [], [], []
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
-            folder_split, df2, iteration, train_split)
+            folder_split, df2, iteration, train_split, shift, past_history, forecast_horizon)
             
         model.fit(x_train, y_train,
              batch_size=batch_size,
