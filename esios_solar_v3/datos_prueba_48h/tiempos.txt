@@ -1,0 +1,10 @@
+
+Tiempo procesado LR_U:4.465221881866455
+Tiempo procesado CNN_U:58.52614784240723
+Tiempo procesado CNN_LSTM_U:106.69510269165039
+Tiempo procesado XGBoost_U:5.825605869293213
+Tiempo procesado SVR_U:198.89776277542114Tiempo procesado CNN_M:116.14284467697144
+Tiempo procesado CNN_LSTM_M:151.93456935882568
+Tiempo procesado LR_M:78.9638979434967
+Tiempo procesado XGBoost_M:254.7311282157898
+Tiempo procesado SVR_M:62.351688861846924

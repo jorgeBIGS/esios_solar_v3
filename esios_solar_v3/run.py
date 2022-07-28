@@ -23,7 +23,7 @@ epochs = 100
 batch_size = 128
 forecast_horizon = 1
 past_history = 48
-shift = 24
+shift = 48
 cv = 10
 
 all_data, df2 = load_data('U')
@@ -40,20 +40,20 @@ train_split = round(len(df_to_scale)*0.8)
 # with open('datos_prueba/tiempos.txt', 'a') as f:
 #     f.write("\nTiempo procesado LR_U:" + str(fin-inicio))
 
-inicio = time.time()
-CNN(all_data, df2, folder_split, cv, epochs, 
-                    batch_size, train_split, 'U', forecast_horizon, past_history)
+# inicio = time.time()
+# CNN(all_data, df2, folder_split, cv, epochs, 
+#                     batch_size, train_split, 'U', forecast_horizon, past_history, shift)
 
-fin = time.time()
-with open('datos_prueba/tiempos.txt', 'a') as f:
-    f.write("\nTiempo procesado CNN_U:" + str(fin-inicio))
+# fin = time.time()
+# with open('datos_prueba/tiempos.txt', 'a') as f:
+#     f.write("\nTiempo procesado CNN_U:" + str(fin-inicio))
     
-inicio = time.time()
-CNN_LSTM(all_data, df2, folder_split, cv, epochs, 
-                    batch_size, train_split, 'U', forecast_horizon, past_history)
-fin = time.time()
-with open('datos_prueba/tiempos.txt', 'a') as f:
-    f.write("\nTiempo procesado CNN_LSTM_U:" + str(fin-inicio))
+# inicio = time.time()
+# CNN_LSTM(all_data, df2, folder_split, cv, epochs, 
+#                     batch_size, train_split, 'U', forecast_horizon, past_history, shift)
+# fin = time.time()
+# with open('datos_prueba/tiempos.txt', 'a') as f:
+#     f.write("\nTiempo procesado CNN_LSTM_U:" + str(fin-inicio))
 
 # inicio = time.time()
 # XGBoost('U', cv, shift, all_data, folder_split, train_split, df2, forecast_horizon, past_history)
@@ -76,26 +76,26 @@ folder_split = round(len(df2)/cv)
 df_to_scale = df2[:folder_split].copy()
 train_split = round(len(df_to_scale)*0.8)
 
-inicio = time.time()
-CNN(all_data, df2, folder_split, cv, epochs, 
-                    batch_size, train_split, 'M', forecast_horizon, past_history)
-fin = time.time()
-with open('datos_prueba/tiempos.txt', 'a') as f:
-    f.write("Tiempo procesado CNN_M:" + str(fin-inicio))
-
-inicio = time.time()
-CNN_LSTM(all_data, df2, folder_split, cv, epochs, 
-                    batch_size, train_split, 'M', forecast_horizon, past_history)
-fin = time.time()
-with open('datos_prueba/tiempos.txt', 'a') as f:
-    f.write("\nTiempo procesado CNN_LSTM_M:" + str(fin-inicio))
-    
 # inicio = time.time()
-# LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
-#              past_history, shift)
+# CNN(all_data, df2, folder_split, cv, epochs, 
+#                     batch_size, train_split, 'M', forecast_horizon, past_history, shift)
 # fin = time.time()
 # with open('datos_prueba/tiempos.txt', 'a') as f:
-#     f.write("\nTiempo procesado LR_M:" + str(fin-inicio))
+#     f.write("Tiempo procesado CNN_M:" + str(fin-inicio))
+
+# inicio = time.time()
+# CNN_LSTM(all_data, df2, folder_split, cv, epochs, 
+#                     batch_size, train_split, 'M', forecast_horizon, past_history, shift)
+# fin = time.time()
+# with open('datos_prueba/tiempos.txt', 'a') as f:
+#     f.write("\nTiempo procesado CNN_LSTM_M:" + str(fin-inicio))
+    
+inicio = time.time()
+LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
+             past_history, shift)
+fin = time.time()
+with open('datos_prueba/tiempos.txt', 'a') as f:
+    f.write("\nTiempo procesado LR_M:" + str(fin-inicio))
 
 # inicio = time.time()
 # XGBoost('M', cv, shift, all_data, folder_split, train_split, df2, forecast_horizon, past_history)
@@ -103,9 +103,9 @@ with open('datos_prueba/tiempos.txt', 'a') as f:
 # with open('datos_prueba/tiempos.txt', 'a') as f:
 #     f.write("\nTiempo procesado XGBoost_M:" + str(fin-inicio))
 
-# inicio = time.time()
-# SVR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
-#              past_history)
-# fin = time.time()
-# with open('datos_prueba/tiempos.txt', 'a') as f:
-#     f.write("\nTiempo procesado SVR_M:" + str(fin-inicio))
+inicio = time.time()
+SVR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
+             past_history, shift)
+fin = time.time()
+with open('datos_prueba/tiempos.txt', 'a') as f:
+    f.write("\nTiempo procesado SVR_M:" + str(fin-inicio))

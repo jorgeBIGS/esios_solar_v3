@@ -48,7 +48,7 @@ def SVR_U(all_data, df2, folder_split, cv, train_split, shift, forecast_horizon,
 
         # We prepare the data to train the model.
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
-            folder_split, df2, iteration, train_split)
+            folder_split, df2, iteration, train_split, shift, past_history, forecast_horizon)
 
         # Reshape the data for the model.
         x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1]*x_train.shape[2]))
@@ -96,13 +96,13 @@ def SVR_U(all_data, df2, folder_split, cv, train_split, shift, forecast_horizon,
         # We store the MAE and WAPE for every folder and draw a gragh with this data.
         saveResults(maeWape, maeWape_esios, 'SVR', 'U')
         dibujaGraph(train_split, folder_split, all_data, iteration,
-                    realData, forecastedData, esiosForecast, 'SVR', 'U')
+                    realData, forecastedData, esiosForecast, 'SVR', 'U', past_history)
 
     # Finally, we store the average value of MAE and WAPE for all the folders.
     saveResultsAverage(maeWape, maeWape_esios, 'SVR', 'U')
     
 def SVR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
-             past_history):
+             past_history, shift):
     """
     Runs SVR multivariate model to forecast solar energy production throught esios data.
     :param all_data: DataFrame object, returned from pandas read_csv function.
@@ -119,17 +119,17 @@ def SVR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
         print("SVR ITERATION", iteration)
         realData, forecastedData, esiosForecast = [], [], []
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
-            folder_split, df2, iteration, train_split)
+            folder_split, df2, iteration, train_split, shift, past_history, forecast_horizon)
     
-        # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1]*x_train.shape[2]))
-        # x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1]*x_test.shape[2]))
+        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1]*x_train.shape[2]))
+        x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1]*x_test.shape[2]))
         
         # We use a selector to reduce the input data for this model. This is important because 
         # clasical regression models such as SVR cant handle large amounts of data.
         sel_ = select_var(x_train, y_train, iteration)        
         X_train_selected = sel_.transform(x_train)
         X_test_selected = sel_.transform(x_test)
-        
+        print("selected:", x_train.shape, X_train_selected.shape, x_test.shape, X_test_selected.shape)
         # We train the model with the training data and use the test data to validate the model.
         clf = clf.fit(X_train_selected, y_train)
         preds = clf.predict(X_test_selected)
@@ -166,6 +166,6 @@ def SVR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
         # We store the MAE and WAPE for every folder and draw a gragh with this data.
         saveResults(maeWape, maeWape_esios, 'SVR', 'M')
         dibujaGraph(train_split, folder_split, all_data, iteration,
-                    realData, forecastedData, esiosForecast, 'SVR', 'M')
+                    realData, forecastedData, esiosForecast, 'SVR', 'M', past_history)
             
     saveResultsAverage(maeWape, maeWape_esios, 'SVR', 'M')

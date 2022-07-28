@@ -45,7 +45,8 @@ def getSeed():
     return seed
 
 def dibujaGraph(train_split, folder_split, df2, iteration, 
-                realData, forecastedData, esiosForecast, modelo, type):
+                realData, forecastedData, esiosForecast, modelo, type,
+                past_history):
     """
   Draw a graph with a comparison of the real values, the esios' predictions and 
   the proposed model's predictions for a folder.
@@ -59,6 +60,7 @@ def dibujaGraph(train_split, folder_split, df2, iteration,
   :param forecastedData: List with the proposed model predictions.
   :param esiosForecast: List with the esios predictions for every proposed model prediction.
   :param modelo: String that represents the name of the model used to predict.
+  :param past_history: int, the number of steps in the past that the model use as the size of the sliding window to create the train data.
   """
     colors = plt.get_cmap('Set2', 8)
     initial_moment = pd.to_datetime(df2.iloc[folder_split*iteration + train_split + past_history].name)
@@ -245,19 +247,21 @@ def evaluate_error(actual, predicted):
     
     return metrics
     
-def prepareTrain(folder_split, df2, iteration, train_split):
+def prepareTrain(folder_split, df2, iteration, train_split, shifted, past_history, forecast_horizon):
     """
   Allows to save the predicted results by the proposed model for every subset
   of the test part inside the folder.
   :param folder_split: Integer that represents the size of a folder.
   :param df2: Dataframe with the solar energy data.
-  :param df3: Dataframe with the eolic energy data.
   :param iteration: Integer that represetns the folder we are using.
   :param train_split: Integer that represents the point of the folder where 
   the test data start.
-  :param tipo: String that represents the kind of energy predicted.
   :return: x_train2, y_train2, x_test2 and y_test2 subsets to train and evaluate 
   the proposed model for a folder.
+  :param forecast_horizon: int, the number of steps in the future that the model will forecast.
+  :param past_history: int, the number of steps in the past that the model use as the size of the sliding window to create the train data.
+  :param shift: int, Specifies how many entries are between the last entry of 
+  the past_history and the first of the forecast_horizon. 
   """
     df_to_scale = df2[folder_split*iteration:folder_split*(iteration+1)].copy()   
     df_to_scale_train = df_to_scale[:train_split].copy()
@@ -265,13 +269,15 @@ def prepareTrain(folder_split, df2, iteration, train_split):
     
     norm_params = {}
     norm_params['mean'] = df_to_scale_train.mean().mean()
-    norm_params['std'] = df_to_scale_train.std().std()
+    norm_params['std'] = np.std(df_to_scale_train)[0]
     norm_params['max'] = df_to_scale_train.max().max()
     norm_params['min'] = df_to_scale_train.min().min()
         
     scaled_data = normalize(df_to_scale_train, norm_params)
     scaled_data_test = normalize(df_to_scale_test, norm_params)
-
+    # scaled_data = df_to_scale_train
+    # scaled_data_test = df_to_scale_test
+    
     x_train, y_train = [], []
     x_test, y_test = [], []
     
@@ -292,7 +298,7 @@ def prepareTrain(folder_split, df2, iteration, train_split):
        
     x_test = np.asarray(x_test)
     y_test = np.asarray(y_test)
-
+    # print(iteration, x_train, y_train)
     return x_train, y_train, x_test, y_test, norm_params
 
 def getResults(realData, forecasts, maeWape):

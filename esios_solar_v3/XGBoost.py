@@ -87,9 +87,9 @@ def XGBoost(tipo, cv, shift, all_data, folder_split, train_split, df2, forecast_
     # which every row contains all the training or test data for the model.
     if shift == 0: shifted = 1
     if(tipo == "M"):
-        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shifted)
+        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shift)
     else:
-        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('U', shifted)
+        lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('U', shift)
 
     reg = inicializa_XGBoost()
     
@@ -123,7 +123,7 @@ def XGBoost(tipo, cv, shift, all_data, folder_split, train_split, df2, forecast_
         # We write the real values, the forecasted values and the esios forecasted values in a file.
         saveResults(maeWape, maeWape_esios, 'XGBOOST', tipo)
         dibujaGraph(train_split, folder_split, df2, iteration,
-                    realData, forecastedData, esiosForecast, 'XGBOOST', tipo)
+                    realData, forecastedData, esiosForecast, 'XGBOOST', tipo, past_history)
     
     # Finally, we store the average value of MAE and WAPE for all the folders.
     saveResultsAverage(maeWape, maeWape_esios, 'XGBOOST', tipo)

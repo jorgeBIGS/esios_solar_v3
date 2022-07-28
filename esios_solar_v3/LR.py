@@ -25,7 +25,7 @@ def LR_Univariant(all_data, df2, folder_split, cv, train_split, shift, forecast_
         print('LR ITERATION', iteration)
         
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
-            folder_split, df2, iteration, train_split)
+            folder_split, df2, iteration, train_split, shift, past_history, forecast_horizon)
         
         x_train = np.reshape(x_train, (x_train.shape[0], past_history))
         x_test = np.reshape(x_test, (x_test.shape[0], past_history))
@@ -60,7 +60,7 @@ def LR_Univariant(all_data, df2, folder_split, cv, train_split, shift, forecast_
         # We store the MAE and WAPE for every folder and draw a gragh with this data.
         saveResults(maeWape, maeWape_esios, 'LR', 'U')
         dibujaGraph(train_split, folder_split, all_data, iteration,
-                    realData, forecastedData, esiosForecast, 'LR', 'U')
+                    realData, forecastedData, esiosForecast, 'LR', 'U', past_history)
                     
     # Finally, we store the average value of MAE and WAPE for all the folders.        
     saveResultsAverage(maeWape, maeWape_esios, 'LR', 'U')
@@ -82,7 +82,7 @@ def LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
     # Loads stacked data to train the model. This is the best data format to train this model, a DataFrame object 
     # which every row contains all the training or test data for the model.
     if shift == 0: shifted = 1
-    lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shifted)
+    lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shift)
     
     for iteration in range(0, cv):
         print('LR ITERATION', iteration)
@@ -93,7 +93,8 @@ def LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
         sel_ = select_var(x_train, y_train, iteration)
         X_train_selected = sel_.transform(x_train)
         X_test_selected = sel_.transform(x_test)
-
+        print("selected:", x_train.shape, X_train_selected.shape, x_test.shape, X_test_selected.shape)
+        
         # Trains the model and forecasts the values for the test data.
         regressor.fit(X_train_selected, y_train)
         preds = regressor.predict(X_test_selected)
@@ -135,7 +136,7 @@ def LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
         # Stores the MAE and WAPE for every folder and draw a gragh with this data.
         saveResults(maeWape, maeWape_esios, 'LR', 'M')
         dibujaGraph(train_split, folder_split, df2, iteration,
-                    realData, forecastedData, esiosForecast, 'LR', 'M')
+                    realData, forecastedData, esiosForecast, 'LR', 'M', past_history)
                     
     # Finally, we store the average value of MAE and WAPE for all the folders.        
     saveResultsAverage(maeWape, maeWape_esios, 'LR', 'M')
