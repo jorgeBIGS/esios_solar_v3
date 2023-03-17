@@ -1,0 +1,22 @@
+
+
+Tiempo procesado LR_U:4.440162897109985
+Tiempo procesado CNN_U:55.89623260498047
+Tiempo procesado CNN_LSTM_U:153.97111558914185
+Tiempo procesado XGBoost_U:3.680000066757202
+Tiempo procesado SVR_U:7.259909152984619
+Tiempo procesado CNN_M:80.69102764129639
+Tiempo procesado CNN_LSTM_M:177.9663372039795
+Tiempo procesado LR_M:38.431638956069946
+Tiempo procesado XGBoost_M:86.51827192306519
+Tiempo procesado SVR_M:38.30988264083862
+Tiempo procesado CNN_F:412.63512325286865
+Tiempo procesado CNN_LSTM_F:460.2301518917084
+Tiempo procesado LR_F:105.93706941604614
+Tiempo procesado XGBoost_F:199.05738520622253
+Tiempo procesado SVR_F:100.160400390625
+Tiempo procesado CNN_FM:411.5587718486786
+Tiempo procesado CNN_LSTM_FM:491.9443562030792
+Tiempo procesado LR_FM:124.90635442733765
+Tiempo procesado XGBoost_FM:238.6109082698822
+Tiempo procesado SVR_FM:124.9824423789978

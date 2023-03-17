@@ -1,7 +1,9 @@
 from sklearn.linear_model import LinearRegression
-from Utils import prepareStackedData, prepareTrain, saveResults, saveResultsAverage, saveValues, getResults, dibujaGraph, load_data_stacked, denormalize, select_var, outlierDetector
+from fileUtils import prepareStackedData, prepareTrain, saveResults, saveResultsAverage,saveValues, load_data_stacked, dibujaGraph
+from outlierUtils import select_var, outlierDetector
+from Utils import getResults
+from normalization import denormalize
 import numpy as np
-from sklearn import linear_model
 
 def LR_Univariant(all_data, df2, folder_split, cv, train_split, shift, forecast_horizon,
              past_history):  
@@ -18,11 +20,14 @@ def LR_Univariant(all_data, df2, folder_split, cv, train_split, shift, forecast_
     """
     # First, we initialize the model and the variables where accuracy metrics will be stored.
     maeWape, maeWape_esios = [[], []], [[], []]
-    regressor = LinearRegression(copy_X=(True), fit_intercept=(True), normalize=True)
+    if(shift == 0 or shift == 48):
+        regressor = LinearRegression(copy_X=(True), fit_intercept=(True), normalize=True)
+    if(shift == 24):
+        regressor = LinearRegression(copy_X=(True), fit_intercept=(False), normalize=True)
 
     # For every folder we will train the model and obtain the MAE and WAPE accuracy metrics using the validate data.
     for iteration in range(0, cv):
-        print('LR ITERATION', iteration)
+        print('LR Block', iteration)
         
         x_train, y_train, x_test, y_test, norm_params = prepareTrain(
             folder_split, df2, iteration, train_split, shift, past_history, forecast_horizon)
@@ -58,43 +63,50 @@ def LR_Univariant(all_data, df2, folder_split, cv, train_split, shift, forecast_
         getResults(realData, esiosForecast, maeWape_esios)
         
         # We store the MAE and WAPE for every folder and draw a gragh with this data.
-        saveResults(maeWape, maeWape_esios, 'LR', 'U')
+        saveResults(maeWape, maeWape_esios, 'LR', 'U', shift)
         dibujaGraph(train_split, folder_split, all_data, iteration,
                     realData, forecastedData, esiosForecast, 'LR', 'U', past_history)
                     
     # Finally, we store the average value of MAE and WAPE for all the folders.        
-    saveResultsAverage(maeWape, maeWape_esios, 'LR', 'U')
+    saveResultsAverage(maeWape, maeWape_esios, 'LR', 'U', shift)
     
 def LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
-             past_history, shift):
+             past_history, shift, type):
     """
     Initializes and runs a LR univariate model to forecast solar energy production throught esios data.
     :param all_data: DataFrame object, returned from pandas read_csv function.
     :param df2: DataFrame object, with the preprocessed data.
     :param cv: int, number of folders.
     :param shift: int, specifies how many entries are between the last entry of the past_history and the first of the forecast_horizon.
+    :param type: str, specifies if we are using Multivariate data with (F) or without forecasted irradiation data (M).
     """
+    realData, forecastedData, esiosForecast = [], [], []
     
     # First, we initialize the model and the variables where accuracy metrics will be stored.
     maeWape, maeWape_esios = [[], []], [[], []]
-    regressor = LinearRegression()
+
+    if(shift == 0 or shift == 48):
+        regressor = LinearRegression(copy_X=(True), fit_intercept=(True), normalize=True)
+    if(shift == 24):
+        regressor = LinearRegression(copy_X=(True), fit_intercept=(False), normalize=True)
 
     # Loads stacked data to train the model. This is the best data format to train this model, a DataFrame object 
     # which every row contains all the training or test data for the model.
-    if shift == 0: shifted = 1
-    lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked('M', shift)
+    if shift == 0: shift = 1
+    lista_train, lista_train_y, lista_test, lista_test_y = load_data_stacked(type, shift)
+    # Prepares the data to train and validates the model in every folder.
+    x_train, y_train, x_test, y_test, norm_params = prepareStackedData(lista_train, lista_train_y, lista_test, lista_test_y, 0)
+    # Selects only the best parameters to train and validates the model.
+    sel_ = select_var(x_train, y_train)
     
     for iteration in range(0, cv):
-        print('LR ITERATION', iteration)
+        print('LR Block', iteration)
         # Prepares the data to train and validates the model in every folder.
         x_train, y_train, x_test, y_test, norm_params = prepareStackedData(lista_train, lista_train_y, lista_test, lista_test_y, iteration)
-
-        # Selects only the best parameters to train and validates the model.
-        sel_ = select_var(x_train, y_train, iteration)
+        
         X_train_selected = sel_.transform(x_train)
         X_test_selected = sel_.transform(x_test)
-        print("selected:", x_train.shape, X_train_selected.shape, x_test.shape, X_test_selected.shape)
-        
+
         # Trains the model and forecasts the values for the test data.
         regressor.fit(X_train_selected, y_train)
         preds = regressor.predict(X_test_selected)
@@ -121,7 +133,7 @@ def LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
             predictedfl.append(predictedf)
             
             # Writes the real values, the forecasted values and the esios forecasted values in a file.
-            saveValues(realesfl, esiosfl, predictedfl, 'LR', 'M')
+            saveValues(realesfl, esiosfl, predictedfl, 'LR', type)
             
             realData.append(realesf)
             forecastedData.append(predictedf)
@@ -134,9 +146,9 @@ def LR_M(all_data, df2, folder_split, cv, train_split, forecast_horizon,
         getResults(realData, esiosForecast, maeWape_esios)
 
         # Stores the MAE and WAPE for every folder and draw a gragh with this data.
-        saveResults(maeWape, maeWape_esios, 'LR', 'M')
+        saveResults(maeWape, maeWape_esios, 'LR', type, shift)
         dibujaGraph(train_split, folder_split, df2, iteration,
-                    realData, forecastedData, esiosForecast, 'LR', 'M', past_history)
+                    realData, forecastedData, esiosForecast, 'LR', type, past_history)
                     
     # Finally, we store the average value of MAE and WAPE for all the folders.        
-    saveResultsAverage(maeWape, maeWape_esios, 'LR', 'M')
+    saveResultsAverage(maeWape, maeWape_esios, 'LR', type, shift)
