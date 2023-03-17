@@ -1,11 +1,11 @@
 [![TensorFlow 2.9.1](https://img.shields.io/badge/TensorFlow-2.9.1-orange?logo=tensorflow)](https://github.com/tensorflow/tensorflow/releases/tag/v2.9.1)
 [![Python 3.8](https://img.shields.io/badge/Python-3.8-blue)](https://www.python.org/downloads/release/python-380/)
 
-Para realizar las pruebas de las redes CNN y CNN_LSTM del artículo solo debe ejecutarse el archivo run.py, 
-en el se pueden encontrar desde la línea 22 a la 27 algunos parámetros que pueden ser modificados:
+Para realizar las pruebas que aparecen en el artículo solo debe ejecutarse los scripts llamados 1-h_script, 24-h_script y 48-h_script, 
+en los que se encuentran algunos parámetros que pueden ser modificados:
   
-  1. Las epochs, por defecto a 100.
-  2. El batch_size, por defecto a 64.
+  1. Epochs, por defecto las selecciondas para cada horizonte de predicción.
+  2. El batch_size por, defecto las selecciondas para cada horizonte de predicción.
   3. El forecast_horizon, por defecto a 1.
   4. El past_history, por defecto a 48.
   5. El shift, indica cual es la diferencia de pasos de tiempo entre el último registro que se usa 
@@ -23,3 +23,6 @@ Los módulos de este proyecto son:
   -XGBoost: Cuenta con todas las funciones que inicializan los modelos de XGBoost y realizan las pruebas de validación.
   -Utils: Contiene las funciones que se usan en los otros módulos para registrar los resultados, organizar la información, pintar las gráficas, normalizar
           los datos, seleccionar las mejores características para modelos multivariantes y evaluar el error.
+  -fileUtils: Contiene las funciones que se usan en los otros módulos para registrar los resultados, organizar la información, pintar las gráficas y                     modificar los archivos csv con los resultados.
+  -normalization.py: Contiene las funciones que se usan en los otros módulos para normalizar los datos.
+  -outlierUtils.py: Contiene las funciones que se usan en los otros módulos para tratar los outliers. 
